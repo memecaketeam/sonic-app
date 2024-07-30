@@ -24,6 +24,8 @@ export const SwapProgressModal = () => {
 
   const activeStep = batchTrx?.activeStep;
 
+  // console.log('swapModalData', steps, activeStep);
+
   const getStepStatus = useStepStatus<SwapModalData['step']>({
     activeStep,
     steps,
@@ -37,6 +39,8 @@ export const SwapProgressModal = () => {
     dispatch(modalsSliceActions.clearSwapModalData());
     dispatch(modalsSliceActions.closeSwapProgressModal());
   };
+
+  console.log('modal', batchTrx);
 
   return (
     <TransactionProgressModal
