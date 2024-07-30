@@ -1,6 +1,23 @@
 import {
-  Box, Button, Flex, Icon, IconButton, Link, Menu, MenuButton, MenuList, Popover, PopoverArrow, PopoverBody,
-  PopoverContent, PopoverTrigger, Skeleton, Stack, Text, Tooltip, useColorModeValue,
+  Box,
+  Button,
+  Flex,
+  Icon,
+  IconButton,
+  Link,
+  Menu,
+  MenuButton,
+  MenuList,
+  Popover,
+  PopoverArrow,
+  PopoverBody,
+  PopoverContent,
+  PopoverTrigger,
+  Skeleton,
+  Stack,
+  Text,
+  Tooltip,
+  useColorModeValue,
 } from '@chakra-ui/react';
 
 import { FaArrowDown } from '@react-icons/all-files/fa/FaArrowDown';
@@ -8,9 +25,18 @@ import { FaCog } from '@react-icons/all-files/fa/FaCog';
 import { FaInfoCircle } from '@react-icons/all-files/fa/FaInfoCircle';
 
 import {
-  SlippageSettings, Token, TokenContent, TokenData, TokenDataBalances, TokenDataPrice,
-  TokenDetailsButton, TokenDetailsLogo, TokenDetailsSymbol, TokenInput, ViewHeader,
-  WalletNotConnected
+  SlippageSettings,
+  Token,
+  TokenContent,
+  TokenData,
+  TokenDataBalances,
+  TokenDataPrice,
+  TokenDetailsButton,
+  TokenDetailsLogo,
+  TokenDetailsSymbol,
+  TokenInput,
+  ViewHeader,
+  WalletNotConnected,
 } from '@/components';
 
 import { useSwapView, useSwapViewStore } from '@/store';
@@ -19,18 +45,41 @@ import { SwapStep } from './';
 import { ExchangeBox, KeepInSonicBox, SwapSubTab } from './components';
 import { useSwapViewData } from './hooks';
 
-
-
 import { RetryFailedTrxModal } from '@/components/modals';
 import { useState } from 'react';
 
 export const SwapView = () => {
   useSwapView('swap');
   const {
-    allowance, step, headerTitle, isAutoSlippage, isICPSelected, isLoading, isBalancesUpdating, isPriceUpdating, isExplanationTooltipVisible,
-    isSelectTokenButtonDisabled, selectTokenButtonText, currentOperation, priceImpact, fromSources, toSources, canHeldInSonic,
-    isConnected, isButtonDisabled, buttonMessage, setStep, setLastChangedInputDataKey, onButtonClick, onChangeValue,
-    onSetIsAutoSlippage, onSetSlippage, onMenuClose, onMaxClick, onSelectToken, onSwitchTokens,
+    allowance,
+    step,
+    headerTitle,
+    isAutoSlippage,
+    isICPSelected,
+    isLoading,
+    isBalancesUpdating,
+    isPriceUpdating,
+    isExplanationTooltipVisible,
+    isSelectTokenButtonDisabled,
+    selectTokenButtonText,
+    currentOperation,
+    priceImpact,
+    fromSources,
+    toSources,
+    canHeldInSonic,
+    isConnected,
+    isButtonDisabled,
+    buttonMessage,
+    setStep,
+    setLastChangedInputDataKey,
+    onButtonClick,
+    onChangeValue,
+    onSetIsAutoSlippage,
+    onSetSlippage,
+    onMenuClose,
+    onMaxClick,
+    onSelectToken,
+    onSwitchTokens,
   } = useSwapViewData('swap');
 
   const swapPlacementButtonBg = useColorModeValue('gray.50', 'custom.3');
@@ -38,37 +87,63 @@ export const SwapView = () => {
   const menuListBg = useColorModeValue('gray.50', 'custom.2');
   const linkColor = useColorModeValue('green.500', 'green.400');
 
-  const { fromTokenOptions, toTokenOptions, from, to, slippage } = useSwapViewStore();
-  
+  const { fromTokenOptions, toTokenOptions, from, to, slippage } =
+    useSwapViewStore();
+
   const [isFailedTrxOpen, setIsFailedTrxOpen] = useState(0);
-  const retryFailedTrx = () => { var r = Math.random() * 100; setIsFailedTrxOpen(r); };
+  const retryFailedTrx = () => {
+    var r = Math.random() * 100;
+    setIsFailedTrxOpen(r);
+  };
 
   return (
-    <Stack spacing={4} mb={9} >
+    <Stack spacing={4} mb={9}>
       <RetryFailedTrxModal isRetryOpen={isFailedTrxOpen} />
       <SwapSubTab tabname={'swap'} />
-      <ViewHeader title={headerTitle}
-        onArrowBack={step === SwapStep.Review ? () => setStep(SwapStep.Home) : undefined}
-       
+      <ViewHeader
+        title={headerTitle}
+        onArrowBack={
+          step === SwapStep.Review ? () => setStep(SwapStep.Home) : undefined
+        }
       >
         <Menu onClose={onMenuClose}>
           <Tooltip label="Adjust the slippage">
-            <MenuButton as={IconButton} isRound size="sm" aria-label="Adjust the slippage"
-              icon={<FaCog />} ml="auto" isDisabled={isICPSelected}
+            <MenuButton
+              as={IconButton}
+              isRound
+              size="sm"
+              aria-label="Adjust the slippage"
+              icon={<FaCog />}
+              ml="auto"
+              isDisabled={isICPSelected}
             />
           </Tooltip>
-          <MenuList bg={menuListBg} shadow={menuListShadow} borderRadius={20} ml={-20} py={0} >
-            <SlippageSettings slippage={slippage} isAutoSlippage={isAutoSlippage} setSlippage={onSetSlippage} setIsAutoSlippage={onSetIsAutoSlippage} />
+          <MenuList
+            bg={menuListBg}
+            shadow={menuListShadow}
+            borderRadius={20}
+            ml={-20}
+            py={0}
+          >
+            <SlippageSettings
+              slippage={slippage}
+              isAutoSlippage={isAutoSlippage}
+              setSlippage={onSetSlippage}
+              setIsAutoSlippage={onSetIsAutoSlippage}
+            />
           </MenuList>
         </Menu>
       </ViewHeader>
 
-
-      <Flex direction="column" alignItems="center" >
+      <Flex direction="column" alignItems="center">
         <Box width="full">
-          <Token value={from.value} setValue={(value) => onChangeValue(value, 'from')}
-            tokenListMetadata={fromTokenOptions} tokenMetadata={from.metadata}
-            isLoading={isLoading} sources={fromSources}
+          <Token
+            value={from.value}
+            setValue={(value) => onChangeValue(value, 'from')}
+            tokenListMetadata={fromTokenOptions}
+            tokenMetadata={from.metadata}
+            isLoading={isLoading}
+            sources={fromSources}
           >
             <TokenContent>
               <TokenDetailsButton onClick={() => onSelectToken('from')}>
@@ -76,7 +151,10 @@ export const SwapView = () => {
                 <TokenDetailsSymbol />
               </TokenDetailsButton>
 
-              <TokenInput autoFocus onChange={() => setLastChangedInputDataKey('from')} />
+              <TokenInput
+                autoFocus
+                onChange={() => setLastChangedInputDataKey('from')}
+              />
             </TokenContent>
             <TokenData>
               <TokenDataBalances
@@ -85,15 +163,18 @@ export const SwapView = () => {
               />
               <TokenDataPrice isUpdating={isPriceUpdating} />
             </TokenData>
-          
           </Token>
         </Box>
 
         <Flex direction="column-reverse" w="full">
-
           <Box width="full">
-            <Token value={to.value} setValue={(value) => onChangeValue(value, 'to')} tokenListMetadata={toTokenOptions}
-              tokenMetadata={to.metadata} isLoading={isLoading} sources={toSources}
+            <Token
+              value={to.value}
+              setValue={(value) => onChangeValue(value, 'to')}
+              tokenListMetadata={toTokenOptions}
+              tokenMetadata={to.metadata}
+              isLoading={isLoading}
+              sources={toSources}
               shouldGlow={step === SwapStep.Review}
             >
               <TokenContent>
@@ -103,8 +184,10 @@ export const SwapView = () => {
                     <TokenDetailsSymbol />
                   </TokenDetailsButton>
                 ) : (
-                  <TokenDetailsButton onClick={() => onSelectToken('to')}
-                    isDisabled={isSelectTokenButtonDisabled} variant={isLoading ? 'solid' : 'gradient'}
+                  <TokenDetailsButton
+                    onClick={() => onSelectToken('to')}
+                    isDisabled={isSelectTokenButtonDisabled}
+                    variant={isLoading ? 'solid' : 'gradient'}
                     colorScheme={isLoading ? 'gray' : 'dark-blue'}
                   >
                     <Skeleton isLoaded={!isLoading}>
@@ -116,7 +199,10 @@ export const SwapView = () => {
               </TokenContent>
               <TokenData>
                 <TokenDataBalances isUpdating={isBalancesUpdating} />
-                <TokenDataPrice isUpdating={isPriceUpdating} priceImpact={priceImpact}>
+                <TokenDataPrice
+                  isUpdating={isPriceUpdating}
+                  priceImpact={priceImpact}
+                >
                   {isExplanationTooltipVisible && (
                     <Popover trigger="hover">
                       <PopoverTrigger>
@@ -150,10 +236,16 @@ export const SwapView = () => {
             </Token>
           </Box>
           <Tooltip label="Switch placement">
-            <IconButton aria-label="Switch placement"
+            <IconButton
+              aria-label="Switch placement"
               icon={<Icon as={FaArrowDown} transition="transform 250ms" />}
-              variant="outline" mt={-2} mb={-2} w="fit-content" mx="auto"
-              data-bg={swapPlacementButtonBg} onClick={onSwitchTokens}
+              variant="outline"
+              mt={-2}
+              mb={-2}
+              w="fit-content"
+              mx="auto"
+              data-bg={swapPlacementButtonBg}
+              onClick={onSwitchTokens}
               colorScheme="green"
               pointerEvents={!to.metadata ? 'none' : 'all'}
               bg={menuListBg}
@@ -168,16 +260,29 @@ export const SwapView = () => {
       </Flex>
 
       <ExchangeBox priceImpact={priceImpact} />
-      <KeepInSonicBox canHeldInSonic={canHeldInSonic} symbol={to.metadata?.symbol} operation={currentOperation} />
-      {(from?.metadata?.symbol == 'ckBTC' || to?.metadata?.symbol == 'ckBTC') ? (
+      <KeepInSonicBox
+        canHeldInSonic={canHeldInSonic}
+        symbol={to.metadata?.symbol}
+        operation={currentOperation}
+      />
+      {from?.metadata?.symbol == 'ckBTC' || to?.metadata?.symbol == 'ckBTC' ? (
         <Text fontSize={12} color="#ffc107">
-          Important Notice: The CKBTC price on Sonic DEX might not reflect the current market price accurately due to fluctuations in LP. Users are strongly advised to do price checks before proceeding with ckBTC swaps. The disparity in prices may result in unexpected losses.
-        </Text>) : ''
-      }
-
+          Important Notice: The CKBTC price on Sonic DEX might not reflect the
+          current market price accurately due to fluctuations in LP. Users are
+          strongly advised to do price checks before proceeding with ckBTC
+          swaps. The disparity in prices may result in unexpected losses.
+        </Text>
+      ) : (
+        ''
+      )}
 
       {isConnected ? (
-        <Button isFullWidth variant="gradient" colorScheme="green" size="lg" onClick={onButtonClick}
+        <Button
+          isFullWidth
+          variant="gradient"
+          colorScheme="green"
+          size="lg"
+          onClick={onButtonClick}
           isLoading={
             isLoading ||
             (step === SwapStep.Review && typeof allowance !== 'number')
@@ -192,13 +297,23 @@ export const SwapView = () => {
       {isConnected ? (
         <Flex alignItems={'self-end'} w="100%" flexDirection="column">
           <Flex>
-            <Text mr={1} mt={1} color={'custom.1'}>Lost funds after swap? </Text>
-            <Button size="sm" borderRadius={8} colorScheme="green" isLoading={isLoading} onClick={retryFailedTrx}>
+            <Text mr={1} mt={1} color={'custom.1'}>
+              Lost funds after swap?{' '}
+            </Text>
+            <Button
+              size="sm"
+              borderRadius={8}
+              colorScheme="green"
+              isLoading={isLoading}
+              onClick={retryFailedTrx}
+            >
               Claim Here
             </Button>
           </Flex>
         </Flex>
-      ) : ''}
+      ) : (
+        ''
+      )}
     </Stack>
   );
 };

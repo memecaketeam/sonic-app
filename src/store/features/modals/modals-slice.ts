@@ -4,7 +4,6 @@ import { Batch } from '@/integrations/transactions';
 import type { RootState } from '@/store';
 import { LocalStorageKey, saveToStorage, getFromStorage } from '@/utils';
 
-
 export type ModalsCallback = (...args: unknown[]) => any;
 
 export enum MintTokenSymbol {
@@ -39,7 +38,7 @@ export type WithdrawWICPModalData = {
 };
 
 export enum SwapModalDataStep {
-  Getacnt= 'getacnt',
+  Getacnt = 'getacnt',
   Approve = 'approve',
   Deposit = 'deposit',
   Swap = 'swap',
@@ -51,13 +50,14 @@ export type SwapModalData = {
   fromTokenSymbol?: string;
   toTokenSymbol?: string;
   callbacks?: [ModalsCallback, ModalsCallback, ModalsCallback];
+  failedSteps?: any;
+  batchTrx?: any;
 };
 
 export enum DepositModalDataStep {
   Approve = 'approve',
   Deposit = 'deposit',
-  Getacnt = 'getacnt'
-
+  Getacnt = 'getacnt',
 }
 
 export type DepositModalData = {
@@ -87,7 +87,6 @@ export type TransferModalData = {
   tokenSymbol?: string;
   callbacks?: [ModalsCallback, ModalsCallback];
 };
-
 
 export enum AddLiquidityModalDataStep {
   Getacnt = 'getacnt',
@@ -192,7 +191,6 @@ interface ModalsState {
 
   isTermsAndConditionsModalOpened: boolean;
   termsAndConditionsModalData: TermsAndConditionsModalData;
-
 }
 
 const initialMintXTCModalData: MintModalData = {
@@ -215,8 +213,7 @@ const initialDepositModalData: DepositModalData = {
   step: undefined,
 };
 
-
-const initialTransferModalData: TransferModalData= {
+const initialTransferModalData: TransferModalData = {
   step: undefined,
 };
 
@@ -270,9 +267,9 @@ const initialState: ModalsState = {
   isDepositFailModalOpened: false,
   depositModalData: initialDepositModalData,
 
-  isTransferProgressModalOpened:false,
+  isTransferProgressModalOpened: false,
   transferModalData: initialTransferModalData,
-  
+
   isWithdrawProgressModalOpened: false,
   isWithdrawFailModalOpened: false,
   withdrawModalData: initialWithdrawModalData,
@@ -294,7 +291,7 @@ const initialState: ModalsState = {
   allowanceModalData: {},
 
   isTermsAndConditionsModalOpened: false,
-  termsAndConditionsModalData: {}
+  termsAndConditionsModalData: {},
 };
 
 export const modalsSlice = createSlice({
@@ -463,7 +460,10 @@ export const modalsSlice = createSlice({
     },
 
     setTransferModalData: (state, action: PayloadAction<TransferModalData>) => {
-      state.transferModalData = { ...state.transferModalData, ...action.payload};
+      state.transferModalData = {
+        ...state.transferModalData,
+        ...action.payload,
+      };
     },
     openTransferProgressModal: (state) => {
       state.isTransferProgressModalOpened = true;
@@ -560,7 +560,10 @@ export const modalsSlice = createSlice({
       state,
       action: PayloadAction<TokenSelectData>
     ) => {
-      state.tokenSelectModalData = { ...action.payload, pinnedTokens: state.tokenSelectModalData.pinnedTokens };
+      state.tokenSelectModalData = {
+        ...action.payload,
+        pinnedTokens: state.tokenSelectModalData.pinnedTokens,
+      };
     },
 
     openRemoveLiquidityModal: (state) => {
@@ -595,23 +598,19 @@ export const modalsSlice = createSlice({
     ) => {
       state.termsAndConditionsModalData = action.payload;
     },
-    onPinToken: (
-      state,
-      action: PayloadAction<string>
-    ) => {
+    onPinToken: (state, action: PayloadAction<string>) => {
       const tokenId = action.payload;
       const { pinnedTokens } = state.tokenSelectModalData;
-      if(!pinnedTokens.includes(tokenId))
+      if (!pinnedTokens.includes(tokenId))
         state.tokenSelectModalData.pinnedTokens.push(action.payload);
       saveToStorage(LocalStorageKey.PINNED_TOKENS, pinnedTokens);
     },
-    onUnPinToken: (
-      state,
-      action: PayloadAction<string>
-    ) => {
+    onUnPinToken: (state, action: PayloadAction<string>) => {
       const tokenId = action.payload;
       const { pinnedTokens } = state.tokenSelectModalData;
-      const updatedPinnedTokens = pinnedTokens.filter((eachPinnedToken) => eachPinnedToken !== tokenId)
+      const updatedPinnedTokens = pinnedTokens.filter(
+        (eachPinnedToken) => eachPinnedToken !== tokenId
+      );
       state.tokenSelectModalData.pinnedTokens = updatedPinnedTokens;
       saveToStorage(LocalStorageKey.PINNED_TOKENS, updatedPinnedTokens);
     },

@@ -14,7 +14,7 @@ import {
   TransactionNotificationContent,
   WithdrawNotificationContent,
   WithdrawWICPNotificationContent,
-  TransferNotificationContent
+  TransferNotificationContent,
 } from './components';
 
 export type NotificationContentProps = Notification;

@@ -1,18 +1,34 @@
-
 import { Pair, Swap, toBigNumber } from '@sonicdex/sonic-js';
 import BigNumber from 'bignumber.js';
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { batch } from 'react-redux';
 
-
 import { ENV } from '@/config';
 import { getAppAssetsSources } from '@/config/utils';
 import { ICP_METADATA } from '@/constants';
-import { useBalances, useQuery, useTokenAllowance, useTokenBalanceMemo, useTokenSelectionChecker } from '@/hooks';
+import {
+  useBalances,
+  useQuery,
+  useTokenAllowance,
+  useTokenBalanceMemo,
+  useTokenSelectionChecker,
+} from '@/hooks';
 
 import {
-  FeatureState, INITIAL_SWAP_SLIPPAGE, NotificationType, SwapTokenDataKey, swapViewActions, useAppDispatch, useCyclesMintingCanisterStore,
-  useNotificationStore, useWalletStore, usePriceStore, useSwapCanisterStore, useSwapViewStore, useTokenModalOpener, getTokenPath
+  FeatureState,
+  INITIAL_SWAP_SLIPPAGE,
+  NotificationType,
+  SwapTokenDataKey,
+  swapViewActions,
+  useAppDispatch,
+  useCyclesMintingCanisterStore,
+  useNotificationStore,
+  useWalletStore,
+  usePriceStore,
+  useSwapCanisterStore,
+  useSwapViewStore,
+  useTokenModalOpener,
+  getTokenPath,
 } from '@/store';
 
 import { formatValue, getMaxValue } from '@/utils/format';
@@ -20,25 +36,38 @@ import { debounce } from '@/utils/function';
 
 import { OperationType } from '../components';
 import {
-  getAmountOutFromPath, getICPValueByXDRRate, getXTCValueByXDRRate,
+  getAmountOutFromPath,
+  getICPValueByXDRRate,
+  getXTCValueByXDRRate,
 } from '../swap.utils';
 
-export enum SwapStep { Home, Review }
+export enum SwapStep {
+  Home,
+  Review,
+}
 
 export const useSwapViewData = (action: string) => {
   const dispatch = useAppDispatch();
-  const [lastChangedInputDataKey, setLastChangedInputDataKey] = useState<SwapTokenDataKey>('from');
+  const [lastChangedInputDataKey, setLastChangedInputDataKey] =
+    useState<SwapTokenDataKey>('from');
 
   const [step, setStep] = useState(SwapStep.Home);
   const [isAutoSlippage, setIsAutoSlippage] = useState(true);
 
   const query = useQuery();
   const { addNotification } = useNotificationStore();
-  const { fromTokenOptions, toTokenOptions, from, to, tokenList, keepInSonic } = useSwapViewStore();
+  const { fromTokenOptions, toTokenOptions, from, to, tokenList, keepInSonic } =
+    useSwapViewStore();
 
   const {
-    sonicBalances, tokenBalances, icpBalance, balancesState, supportedTokenListState,
-    supportedTokenList, allPairsState, allPairs,
+    sonicBalances,
+    tokenBalances,
+    icpBalance,
+    balancesState,
+    supportedTokenListState,
+    supportedTokenList,
+    allPairsState,
+    allPairs,
   } = useSwapCanisterStore();
 
   const { totalBalances } = useBalances();
@@ -53,17 +82,27 @@ export const useSwapViewData = (action: string) => {
     isFirstIsSelected: isFromTokenIsICP,
     isSecondIsSelected: isToTokenIsICP,
     isTokenSelected: isICPSelected,
-  } = useTokenSelectionChecker({ id0: from.metadata?.id, id1: to.metadata?.id });
+  } = useTokenSelectionChecker({
+    id0: from.metadata?.id,
+    id1: to.metadata?.id,
+  });
 
   const {
     isTokenSelected: isWICPSelected,
     isFirstIsSelected: isFromTokenIsWICP,
     isSecondIsSelected: isToTokenIsWICP,
-  } = useTokenSelectionChecker({ id0: from.metadata?.id, id1: to.metadata?.id, targetId: ENV.canistersPrincipalIDs.WICP });
+  } = useTokenSelectionChecker({
+    id0: from.metadata?.id,
+    id1: to.metadata?.id,
+    targetId: ENV.canistersPrincipalIDs.WICP,
+  });
 
-  const {
-    isSecondIsSelected: isToTokenIsXTC, isTokenSelected: isXTCSelected } =
-    useTokenSelectionChecker({ id0: from.metadata?.id, id1: to.metadata?.id, targetId: ENV.canistersPrincipalIDs.XTC });
+  const { isSecondIsSelected: isToTokenIsXTC, isTokenSelected: isXTCSelected } =
+    useTokenSelectionChecker({
+      id0: from.metadata?.id,
+      id1: to.metadata?.id,
+      targetId: ENV.canistersPrincipalIDs.XTC,
+    });
 
   const fromBalance = useTokenBalanceMemo(from.metadata?.id);
   const toBalance = useTokenBalanceMemo(to.metadata?.id);
@@ -74,12 +113,16 @@ export const useSwapViewData = (action: string) => {
     const _newValue = new BigNumber(newValue);
     const icpFee = formatValue(ICP_METADATA.fee, ICP_METADATA.decimals);
 
-    const value = dataKey === 'from' ? _newValue.minus(icpFee) : _newValue.plus(icpFee);
+    const value =
+      dataKey === 'from' ? _newValue.minus(icpFee) : _newValue.plus(icpFee);
 
     dispatch(
       swapViewActions.setValue({
         data: oppositeDataKey,
-        value: value.toNumber() > 0 ? value.dp(ICP_METADATA.decimals).toString() : '',
+        value:
+          value.toNumber() > 0
+            ? value.dp(ICP_METADATA.decimals).toString()
+            : '',
       })
     );
   }
@@ -100,16 +143,24 @@ export const useSwapViewData = (action: string) => {
       const icpFeesConvertedToXTC = getXTCValueByXDRRate({
         amount: formatValue(ICP_METADATA.fee, ICP_METADATA.decimals),
         conversionRate: ICPXDRconversionRate,
-      }).minus(xtcFee).multipliedBy(2);
+      })
+        .minus(xtcFee)
+        .multipliedBy(2);
 
       const xtcFees = xtcFee.multipliedBy(keepInSonic ? 4 : 2);
 
       const amount =
         dataKey === 'from'
           ? newValue
-          : new BigNumber(newValue).plus(xtcFees).plus(icpFeesConvertedToXTC).toString();
+          : new BigNumber(newValue)
+              .plus(xtcFees)
+              .plus(icpFeesConvertedToXTC)
+              .toString();
 
-      const rateBasedAmount = handler({ amount, conversionRate: ICPXDRconversionRate });
+      const rateBasedAmount = handler({
+        amount,
+        conversionRate: ICPXDRconversionRate,
+      });
 
       const resultAmount =
         dataKey === 'from'
@@ -130,15 +181,24 @@ export const useSwapViewData = (action: string) => {
     const data = dataKey === 'from' ? from : to;
     const oppositeData = dataKey === 'from' ? to : from;
 
-    const wrappedICPMetadata = supportedTokenList?.find((token) => token.id === ENV.canistersPrincipalIDs.WICP);
+    const wrappedICPMetadata = supportedTokenList?.find(
+      (token) => token.id === ENV.canistersPrincipalIDs.WICP
+    );
 
     if (wrappedICPMetadata && tokenList && allPairs) {
       const paths = getTokenPath({
-        pairList: allPairs as unknown as Pair.List, tokenList,
-        tokenId: wrappedICPMetadata.id, amount: newValue,
+        pairList: allPairs as unknown as Pair.List,
+        tokenList,
+        tokenId: wrappedICPMetadata.id,
+        amount: newValue,
       });
       const dataWICP = { ...data, metadata: wrappedICPMetadata, paths };
-      dispatch(swapViewActions.setValue({ data: oppositeDataKey, value: getAmountOutFromPath(dataWICP, oppositeData) }));
+      dispatch(
+        swapViewActions.setValue({
+          data: oppositeDataKey,
+          value: getAmountOutFromPath(dataWICP, oppositeData),
+        })
+      );
     }
   }
 
@@ -197,7 +257,9 @@ export const useSwapViewData = (action: string) => {
     const balance = dataKey === 'from' ? fromBalance : toBalance;
     const metadata = dataKey === 'from' ? from.metadata : to.metadata;
 
-    if (!balance) { return }
+    if (!balance) {
+      return;
+    }
 
     const maxValue = getMaxValue(metadata, balance).toString();
     handleChangeValue(maxValue, dataKey);
@@ -208,7 +270,8 @@ export const useSwapViewData = (action: string) => {
 
     const options = dataKey === 'from' ? fromTokenOptions : toTokenOptions;
     const oppositeDataKey = dataKey === 'from' ? 'to' : 'from';
-    const oppositeTokenId = dataKey === 'from' ? to.metadata?.id : from.metadata?.id;
+    const oppositeTokenId =
+      dataKey === 'from' ? to.metadata?.id : from.metadata?.id;
 
     openSelectTokenModal({
       metadata: options,
@@ -221,11 +284,21 @@ export const useSwapViewData = (action: string) => {
             return;
           }
           if (oppositeTokenId === tokenId) {
-            dispatch(swapViewActions.setToken({ data: oppositeDataKey, tokenId: undefined }));
+            dispatch(
+              swapViewActions.setToken({
+                data: oppositeDataKey,
+                tokenId: undefined,
+              })
+            );
             dispatch(swapViewActions.setToken({ data: dataKey, tokenId }));
-          } else if (tokenId === ENV.canistersPrincipalIDs.XTC && to.metadata?.id === ICP_METADATA.id) {
+          } else if (
+            tokenId === ENV.canistersPrincipalIDs.XTC &&
+            to.metadata?.id === ICP_METADATA.id
+          ) {
             dispatch(swapViewActions.setToken({ data: dataKey, tokenId }));
-            dispatch(swapViewActions.setToken({ data: oppositeDataKey, tokenId: '' }));
+            dispatch(
+              swapViewActions.setToken({ data: oppositeDataKey, tokenId: '' })
+            );
           } else {
             dispatch(swapViewActions.setToken({ data: dataKey, tokenId }));
           }
@@ -235,7 +308,6 @@ export const useSwapViewData = (action: string) => {
     });
   };
 
-
   const handleMintXTC = useCallback(() => {
     addNotification({
       title: `Minting ${to.value} ${to.metadata?.symbol}`,
@@ -243,12 +315,7 @@ export const useSwapViewData = (action: string) => {
       id: String(new Date().getTime()),
     });
     debounce(resetViewState, 300);
-  }, [
-    addNotification,
-    resetViewState,
-    to.metadata?.symbol,
-    to.value,
-  ]);
+  }, [addNotification, resetViewState, to.metadata?.symbol, to.value]);
 
   const handleMintWICP = useCallback(() => {
     addNotification({
@@ -269,16 +336,26 @@ export const useSwapViewData = (action: string) => {
     debounce(resetViewState, 300);
   }, [addNotification, from.metadata?.symbol, from.value, resetViewState]);
 
-  useEffect(() => { handleChangeValue(from.value, 'from'); }, [to.metadata]);
+  useEffect(() => {
+    handleChangeValue(from.value, 'from');
+  }, [to.metadata]);
 
   const handleApproveSwap = useCallback(() => {
     addNotification({
       title: `Swap ${from.value} ${from.metadata?.symbol} for ${to.value} ${to.metadata?.symbol}`,
-      type: NotificationType.Swap, id: String(new Date().getTime()),
+      type: NotificationType.Swap,
+      id: String(new Date().getTime()),
     });
 
     debounce(resetViewState, 300);
-  }, [addNotification, from.metadata?.symbol, from.value, resetViewState, to.metadata?.symbol, to.value]);
+  }, [
+    addNotification,
+    from.metadata?.symbol,
+    from.value,
+    resetViewState,
+    to.metadata?.symbol,
+    to.value,
+  ]);
 
   const allowance = useTokenAllowance(from.metadata?.id);
 
@@ -336,7 +413,10 @@ export const useSwapViewData = (action: string) => {
       return [true, `Enter ${from.metadata.symbol} Amount`];
 
     if (
-      parsedFromValue <= toBigNumber(from.metadata.fee).applyDecimals(from.metadata.decimals).toNumber()
+      parsedFromValue <=
+      toBigNumber(from.metadata.fee)
+        .applyDecimals(from.metadata.decimals)
+        .toNumber()
     ) {
       return [true, `${from.metadata.symbol} amount must be greater than fee`];
     }
@@ -344,7 +424,10 @@ export const useSwapViewData = (action: string) => {
     const parsedToValue = (to.value && parseFloat(to.value)) || 0;
 
     if (
-      parsedToValue <= toBigNumber(to.metadata.fee).applyDecimals(to.metadata.decimals).toNumber()
+      parsedToValue <=
+      toBigNumber(to.metadata.fee)
+        .applyDecimals(to.metadata.decimals)
+        .toNumber()
     ) {
       return [true, `${to.metadata.symbol} amount must be greater than fee`];
     }
@@ -377,13 +460,31 @@ export const useSwapViewData = (action: string) => {
       }
     };
     const buttonText = step === SwapStep.Review ? 'Swap' : 'Review Swap';
-    const waitingForAllowance = step === SwapStep.Review && typeof allowance === 'undefined';
+    const waitingForAllowance =
+      step === SwapStep.Review && typeof allowance === 'undefined';
 
     return [waitingForAllowance, buttonText, handleButtonClick];
   }, [
-    isLoading, isFetchingNotStarted, from.metadata, from.value, to.metadata, to.value, toTokenOptions, totalBalances,
-    fromBalance, isFromTokenIsICP, isToTokenIsWICP, isFromTokenIsWICP, isToTokenIsICP, isToTokenIsXTC, step, allowance,
-    handleMintWICP, handleWithdrawWICP, handleMintXTC, handleApproveSwap,
+    isLoading,
+    isFetchingNotStarted,
+    from.metadata,
+    from.value,
+    to.metadata,
+    to.value,
+    toTokenOptions,
+    totalBalances,
+    fromBalance,
+    isFromTokenIsICP,
+    isToTokenIsWICP,
+    isFromTokenIsWICP,
+    isToTokenIsICP,
+    isToTokenIsXTC,
+    step,
+    allowance,
+    handleMintWICP,
+    handleWithdrawWICP,
+    handleMintXTC,
+    handleApproveSwap,
   ]);
 
   const headerTitle = useMemo(() => {
@@ -408,17 +509,14 @@ export const useSwapViewData = (action: string) => {
     isToTokenIsICP,
   ]);
 
-  const priceImpact = useMemo(
-    () => {
-      return Swap.getPriceImpact({
-        amountIn: parseFloat(from.value) > 0 ? from.value : '0',
-        amountOut: to.value,
-        priceIn: from.metadata?.price ?? '0',
-        priceOut: to.metadata?.price ?? '0',
-      }).toString();
-    },
-    [from, to]
-  );
+  const priceImpact = useMemo(() => {
+    return Swap.getPriceImpact({
+      amountIn: parseFloat(from.value) > 0 ? from.value : '0',
+      amountOut: to.value,
+      priceIn: from.metadata?.price ?? '0',
+      priceOut: to.metadata?.price ?? '0',
+    }).toString();
+  }, [from, to]);
 
   const selectedTokenIds = useMemo(() => {
     const selectedIds = [];
@@ -482,8 +580,8 @@ export const useSwapViewData = (action: string) => {
       isFromTokenIsICP && isToTokenIsWICP
         ? OperationType.Wrap
         : isFromTokenIsICP && isToTokenIsXTC
-          ? OperationType.Mint
-          : OperationType.Swap,
+        ? OperationType.Mint
+        : OperationType.Swap,
     [isFromTokenIsICP, isToTokenIsWICP, isToTokenIsXTC]
   );
 
@@ -496,15 +594,17 @@ export const useSwapViewData = (action: string) => {
       const tokenToId = query.get('to');
 
       if (tokenFromId) {
-        const from = fromTokenOptions.find(({ id }:any) => id === tokenFromId);
+        const from = fromTokenOptions.find(({ id }: any) => id === tokenFromId);
         if (from?.id) {
-          dispatch(swapViewActions.setToken({ data: 'from', tokenId: from.id }));
+          dispatch(
+            swapViewActions.setToken({ data: 'from', tokenId: from.id })
+          );
           dispatch(swapViewActions.setValue({ data: 'from', value: '' }));
         }
       }
 
       if (tokenToId) {
-        const to = toTokenOptions.find(({ id }:any) => id === tokenToId);
+        const to = toTokenOptions.find(({ id }: any) => id === tokenToId);
         if (to?.id) {
           dispatch(swapViewActions.setToken({ data: 'to', tokenId: to.id }));
           dispatch(swapViewActions.setValue({ data: 'to', value: '' }));
@@ -515,10 +615,34 @@ export const useSwapViewData = (action: string) => {
   }, [isLoading]);
 
   return {
-    step, allowance, isButtonDisabled, buttonMessage, canHeldInSonic, isAutoSlippage, headerTitle, isConnected, isLoading, isBalancesUpdating,
-    isPriceUpdating, priceImpact, fromSources, toSources, currentOperation, isICPSelected, isExplanationTooltipVisible,
-    isSelectTokenButtonDisabled, selectTokenButtonText, setStep, setLastChangedInputDataKey, onButtonClick: handleButtonClick,
-    onMenuClose: handleMenuClose, onSetSlippage: handleSetSlippage, onSetIsAutoSlippage: handleSetIsAutoSlippage, onChangeValue: handleChangeValue,
-    onSelectToken: handleSelectToken, onMaxClick: handleMaxClick, onSwitchTokens: handleSwitchTokens,
+    step,
+    allowance,
+    isButtonDisabled,
+    buttonMessage,
+    canHeldInSonic,
+    isAutoSlippage,
+    headerTitle,
+    isConnected,
+    isLoading,
+    isBalancesUpdating,
+    isPriceUpdating,
+    priceImpact,
+    fromSources,
+    toSources,
+    currentOperation,
+    isICPSelected,
+    isExplanationTooltipVisible,
+    isSelectTokenButtonDisabled,
+    selectTokenButtonText,
+    setStep,
+    setLastChangedInputDataKey,
+    onButtonClick: handleButtonClick,
+    onMenuClose: handleMenuClose,
+    onSetSlippage: handleSetSlippage,
+    onSetIsAutoSlippage: handleSetIsAutoSlippage,
+    onChangeValue: handleChangeValue,
+    onSelectToken: handleSelectToken,
+    onMaxClick: handleMaxClick,
+    onSwitchTokens: handleSwitchTokens,
   };
 };
