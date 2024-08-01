@@ -3,7 +3,7 @@ import { deserialize, serialize } from '@sonicdex/sonic-js';
 import { useEffect, useMemo } from 'react';
 
 import { useTokenAllowance } from '@/hooks';
-import { useBalances } from '@/hooks/use-balances';
+// import { useBalances } from '@/hooks/use-balances';
 import { useSwapBatch } from '@/integrations/transactions';
 import {
   modalsSliceActions,
@@ -26,7 +26,7 @@ export const SwapNotificationContent: React.FC<
   const swapViewStore = useSwapViewStore();
   const { addNotification, popNotification } = useNotificationStore();
   const { principalId } = useWalletStore();
-  const { getBalances } = useBalances();
+  //const { getBalances } = useBalances();
   // const { getAllPairs } = useAllPairs();
 
   const { from, to, slippage, keepInSonic } =
@@ -107,7 +107,7 @@ export const SwapNotificationContent: React.FC<
         modalsSliceActions.setSwapModalData({
           step: batch?.state as SwapModalDataStep,
           failedSteps: {
-            steps: batchExecutalbe?.FailedSteps,
+            steps: batchExecutalbe?.failedSteps,
           },
         })
       );
@@ -137,26 +137,29 @@ export const SwapNotificationContent: React.FC<
   useEffect(() => {
     handleOpenModal();
     if (typeof allowance === 'undefined' || !batch?.state) return;
-    if (batchExecutalbe?.execute) {
-      batchExecutalbe
-        .execute()
-        .then((data: any) => {
-          if (data) {
-            dispatch(modalsSliceActions.clearSwapModalData());
-            dispatch(modalsSliceActions.closeSwapProgressModal());
-            addNotification({
-              title: `Swapped ${from.value} ${from.metadata.symbol} for ${to.value} ${to.metadata.symbol}`,
-              type: NotificationType.Success,
-              id: Date.now().toString(),
-              transactionLink: '/activity',
-            });
-            getBalances();
-          } else handleError();
-        })
-        .catch((err: any) => handleError(err))
-        .finally(() => popNotification(id));
-    }
-  }, [batch?.state, batchFnUpdate]);
+
+
+    console.log(batchExecutalbe);
+
+
+    // if (batchExecutalbe?.execute) {
+    //   batchExecutalbe.execute().then((data: any) => {
+    //       if (data) {
+    //         dispatch(modalsSliceActions.clearSwapModalData());
+    //         dispatch(modalsSliceActions.closeSwapProgressModal());
+    //         addNotification({
+    //           title: `Swapped ${from.value} ${from.metadata.symbol} for ${to.value} ${to.metadata.symbol}`,
+    //           type: NotificationType.Success,
+    //           id: Date.now().toString(),
+    //           transactionLink: '/activity',
+    //         });
+    //         getBalances();
+    //       } else handleError();
+    //     })
+    //     .catch((err: any) => handleError(err))
+    //     .finally(() => popNotification(id));
+    // }
+  }, [batchFnUpdate]);
 
   return (
     <Link

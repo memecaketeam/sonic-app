@@ -96,7 +96,7 @@ export const SwapProgressModal = () => {
           {batchTrx?.state === 'error' &&
             batchTrx?.FailedSteps?.includes(batchTrx?.activeStep) && (
               <>
-                <Text>Swap failed during {batchTrx?.FailedSteps?.[0]}</Text>
+                <Text>Swap failed during {batchTrx?.failedSteps?.[0]}</Text>
                 <Flex gap={8}>
                   <Button
                     colorScheme={'green'}
