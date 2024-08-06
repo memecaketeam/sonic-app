@@ -99,6 +99,8 @@ export const useSwapBatch = ({
         steps: Object.keys(trxList) as SwapModalDataStep[],
         fromTokenSymbol: swapParams.from.metadata?.symbol,
         toTokenSymbol: swapParams.to.metadata?.symbol,
+        fromValue: swapParams.from.value,
+        toValue: swapParams.to.value,
         batchTrx: SwapBatchTrx,
       })
     );

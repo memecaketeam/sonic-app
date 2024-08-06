@@ -106,33 +106,14 @@ export const SwapNotificationContent: React.FC<
       dispatch(
         modalsSliceActions.setSwapModalData({
           step: batch?.state as SwapModalDataStep,
-          failedSteps: {
-            steps: batchExecutalbe?.FailedSteps,
-          },
         })
       );
     }
-    // dispatch(modalsSliceActions.clearSwapModalData());
-    // dispatch(
-    //   modalsSliceActions.setSwapModalData({
-    //     step: batchExecutalbe?.activeStep as SwapModalDataStep,
-    //     failedSteps: {
-    //       steps: batchExecutalbe?.FailedSteps,
-    //       state: batchExecutalbe?.state,
-    //     },
-    //   })
-    // );
-    // dispatch(modalsSliceActions.closeSwapProgressModal());
 
     popNotification(id);
   };
 
-  useEffect(handleStateChange, [
-    batchExecutalbe.activeStep,
-    batch?.state,
-    batchExecutalbe?.state,
-    batchExecutalbe?.FailedSteps,
-  ]);
+  useEffect(handleStateChange, [batchExecutalbe?.activeStep, batch.state]);
 
   useEffect(() => {
     handleOpenModal();
@@ -156,7 +137,7 @@ export const SwapNotificationContent: React.FC<
         .catch((err: any) => handleError(err))
         .finally(() => popNotification(id));
     }
-  }, [batch?.state, batchFnUpdate]);
+  }, [batch.state, batchFnUpdate]);
 
   return (
     <Link

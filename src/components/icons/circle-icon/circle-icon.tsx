@@ -36,7 +36,6 @@ export const CircleIcon = ({ status, iconSrc }: CircleIconProps) => {
       borderRadius="2.8125rem"
       position="relative"
       bg={bg}
-    
     >
       {status === 'active' && (
         <Box

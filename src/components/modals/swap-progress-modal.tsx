@@ -1,12 +1,15 @@
 import { checkPlainSrc, depositSrc, swapSrc, withdrawSrc } from '@/assets';
 import {
   modalsSliceActions,
+  NotificationType,
   SwapModalData,
   SwapModalDataStep,
   useAppDispatch,
   useModalsStore,
+  useNotificationStore,
 } from '@/store';
 import { Box, Button, Flex, Text } from '@chakra-ui/react';
+import { useEffect, useState } from 'react';
 
 import { useStepStatus } from '.';
 import { TransactionProgressModal, TransactionStep } from './components';
@@ -14,17 +17,20 @@ import { TransactionProgressModal, TransactionStep } from './components';
 export const SwapProgressModal = () => {
   const dispatch = useAppDispatch();
   const { isSwapProgressModalOpened, swapModalData } = useModalsStore();
+  const { addNotification } = useNotificationStore();
+  const [isRetrying, setIsRetrying] = useState(false);
+
   const {
     steps,
     fromTokenSymbol,
     toTokenSymbol,
     // step: activeStep,
     batchTrx,
+    fromValue,
+    toValue,
   } = swapModalData;
 
   const activeStep = batchTrx?.activeStep;
-
-  // console.log('swapModalData', steps, activeStep);
 
   const getStepStatus = useStepStatus<SwapModalData['step']>({
     activeStep,
@@ -40,7 +46,26 @@ export const SwapProgressModal = () => {
     dispatch(modalsSliceActions.closeSwapProgressModal());
   };
 
-  console.log('modal', batchTrx);
+  useEffect(() => {
+    if (batchTrx?.state === 'done') {
+      handleClose();
+      dispatch(modalsSliceActions.clearSwapModalData());
+      addNotification({
+        title: `Swapped ${fromValue} ${fromTokenSymbol} for ${toValue} ${toTokenSymbol}`,
+        type: NotificationType.Success,
+        id: Date.now().toString(),
+        transactionLink: '/activity',
+      });
+    }
+  }, [batchTrx?.state]);
+
+  const onClickRetry = () => {
+    setIsRetrying(true);
+    batchTrx.retryExecute();
+    setTimeout(() => {
+      setIsRetrying(false);
+    }, 3000);
+  };
 
   return (
     <TransactionProgressModal
@@ -49,8 +74,8 @@ export const SwapProgressModal = () => {
       isCentered
       title="Swap in progress"
     >
-      <Box>
-        <Flex>
+      <Box w="100%">
+        <Flex alignItems="center" justifyContent="center">
           {steps?.includes(SwapModalDataStep.Getacnt) && (
             <TransactionStep
               status={getStepStatus(SwapModalDataStep.Getacnt)}
@@ -97,28 +122,28 @@ export const SwapProgressModal = () => {
           )}
         </Flex>
         <Flex alignItems="center" justifyContent="center" mt={8} gap={6}>
-          {batchTrx?.state === 'error' &&
-            batchTrx?.FailedSteps?.includes(batchTrx?.activeStep) && (
-              <>
-                <Text>Swap failed during {batchTrx?.FailedSteps?.[0]}</Text>
-                <Flex gap={8}>
-                  <Button
-                    colorScheme={'green'}
-                    variant={'gradient'}
-                    onClick={() => batchTrx.retryExecute()}
-                  >
-                    Retry
-                  </Button>
-                  <Button
-                    colorScheme={'green'}
-                    variant={'outline'}
-                    onClick={handleCancel}
-                  >
-                    Cancel
-                  </Button>
-                </Flex>
-              </>
-            )}
+          {batchTrx?.state === 'error' && (
+            <>
+              <Text>Swaping failed</Text>
+              <Flex gap={8}>
+                <Button
+                  colorScheme={'green'}
+                  variant={'gradient'}
+                  onClick={onClickRetry}
+                  isDisabled={isRetrying}
+                >
+                  Retry
+                </Button>
+                <Button
+                  colorScheme={'green'}
+                  variant={'outline'}
+                  onClick={handleCancel}
+                >
+                  Cancel
+                </Button>
+              </Flex>
+            </>
+          )}
         </Flex>
       </Box>
     </TransactionProgressModal>

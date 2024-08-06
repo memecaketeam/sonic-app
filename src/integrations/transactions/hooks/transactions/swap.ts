@@ -9,10 +9,9 @@ import { parseAmount } from '@/utils/format';
 
 //import { useBalances } from '@/hooks';
 
-import {  getswapActor } from '@/utils' ;
+// import { getswapActor } from '@/utils';
 
 import { CreateTransaction, SwapModel } from '../../models';
-
 
 export type SwapTransaction = {
   idl: any;
@@ -63,14 +62,17 @@ export interface SwapExtraArgs {
 //   return tokenInfo
 // };
 
-var SwapActor:any;
+// var SwapActor: any;
 
-(async () => { 
-  SwapActor = await getswapActor(false);
-})();
+// (async () => {
+//   SwapActor = await getswapActor(false);
+// })();
 
 export const useSwapExactTokensTransactionMemo: CreateTransaction<SwapModel> = (
-  { from, to, slippage, principalId, entryVal }: SwapModel, onSuccess, onFail) => {
+  { from, to, slippage, principalId, entryVal }: SwapModel,
+  onSuccess,
+  onFail
+) => {
   var fromValue = from.value;
   //let balances = useBalances();
   return useMemo(() => {
@@ -88,7 +90,11 @@ export const useSwapExactTokensTransactionMemo: CreateTransaction<SwapModel> = (
     // }
 
     const amountIn = parseAmount(fromValue, from.metadata.decimals);
-    var outAmountMin = Swap.getAmountMin({ amount: to.value, slippage, decimals: to.metadata.decimals }).toNumber();
+    var outAmountMin = Swap.getAmountMin({
+      amount: to.value,
+      slippage,
+      decimals: to.metadata.decimals,
+    }).toNumber();
 
     // if (from.metadata?.symbol == 'YC' && parseFloat(entryVal || '') > 0) {
     //   outAmountMin = outAmountMin - (outAmountMin * 0.11);
@@ -96,7 +102,10 @@ export const useSwapExactTokensTransactionMemo: CreateTransaction<SwapModel> = (
 
     const currentTime = (new Date().getTime() + 5 * 60 * 1000) * 10000000;
 
-    var amountOutMin = parseAmount(outAmountMin.toString(), to.metadata.decimals);
+    var amountOutMin = parseAmount(
+      outAmountMin.toString(),
+      to.metadata.decimals
+    );
     return {
       canisterId: ENV.canistersPrincipalIDs.swap,
       idl: SwapIDL.factory,
@@ -106,16 +115,31 @@ export const useSwapExactTokensTransactionMemo: CreateTransaction<SwapModel> = (
         if ('err' in res) throw new Error(res.err);
         if (onSuccess) onSuccess(res);
       },
-      args: [amountIn, amountOutMin, from.paths[to.metadata.id]?.path, Principal.fromText(principalId), BigInt(currentTime)],
+      args: [
+        amountIn,
+        amountOutMin,
+        from.paths[to.metadata.id]?.path,
+        Principal.fromText(principalId),
+        BigInt(currentTime),
+      ],
       amountOutMin: outAmountMin,
-      updateNextStep: async (trxResult: any, nextTrxItem: any, trxObj:any) => {
+      updateNextStep: async (trxResult: any, nextTrxItem: any, trxObj: any) => {
         if (nextTrxItem) {
           if (trxResult?.ok) {
-            const data = await SwapActor?.getLastTransactionOutAmount();
-            if(data?.SwapOutAmount) nextTrxItem.args[1] = data?.SwapOutAmount;
+            nextTrxItem.args[1] = trxResult?.ok;
           }
         }
       },
     };
-  }, [from.metadata, from.value, from.paths, to.metadata, to.value, principalId, slippage, onFail, onSuccess]);
+  }, [
+    from.metadata,
+    from.value,
+    from.paths,
+    to.metadata,
+    to.value,
+    principalId,
+    slippage,
+    onFail,
+    onSuccess,
+  ]);
 };

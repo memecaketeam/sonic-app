@@ -25,6 +25,9 @@ export type MintModalData<
   step?: MintModalDataStep | Batch.DefaultHookState;
   steps?: (MintModalDataStep | Batch.DefaultHookState)[];
   callbacks?: [RetryCallback, CancelCallback];
+  batchTrx?: any;
+  tokenSymbol?: string;
+  amount?: string;
 };
 
 export enum WithdrawWICPModalDataStep {
@@ -35,6 +38,7 @@ export type WithdrawWICPModalData = {
   step?: WithdrawWICPModalDataStep | Batch.DefaultHookState;
   steps?: (WithdrawWICPModalDataStep | Batch.DefaultHookState)[];
   callbacks?: [ModalsCallback, ModalsCallback];
+  batchTrx?: any;
 };
 
 export enum SwapModalDataStep {
@@ -50,8 +54,9 @@ export type SwapModalData = {
   fromTokenSymbol?: string;
   toTokenSymbol?: string;
   callbacks?: [ModalsCallback, ModalsCallback, ModalsCallback];
-  failedSteps?: any;
   batchTrx?: any;
+  fromValue?: string;
+  toValue?: string;
 };
 
 export enum DepositModalDataStep {
@@ -65,6 +70,8 @@ export type DepositModalData = {
   steps?: (DepositModalDataStep | Batch.DefaultHookState)[];
   tokenSymbol?: string;
   callbacks?: [ModalsCallback, ModalsCallback];
+  batchTrx?: any;
+  amount?: string;
 };
 
 export enum WithdrawModalDataStep {
@@ -75,6 +82,8 @@ export type WithdrawModalData = {
   steps?: (WithdrawModalDataStep | Batch.DefaultHookState)[];
   tokenSymbol?: string;
   callbacks?: [ModalsCallback, ModalsCallback];
+  batchTrx?: any;
+  withdrawAmount?: string;
 };
 
 export enum TransferModalDataStep {
@@ -86,6 +95,8 @@ export type TransferModalData = {
   steps?: (TransferModalDataStep | Batch.DefaultHookState)[];
   tokenSymbol?: string;
   callbacks?: [ModalsCallback, ModalsCallback];
+  batchTrx?: any;
+  fromValue?: string;
 };
 
 export enum AddLiquidityModalDataStep {
@@ -103,6 +114,9 @@ export type AddLiquidityModalData = {
   token0Symbol?: string;
   token1Symbol?: string;
   callbacks?: [ModalsCallback, ModalsCallback];
+  batchTrx?: any;
+  fromValue?: string;
+  toValue?: string;
 };
 
 export enum RemoveLiquidityModalDataStep {
@@ -116,6 +130,9 @@ export type RemoveLiquidityModalData = {
   token0Symbol?: string;
   token1Symbol?: string;
   callbacks?: [ModalsCallback, ModalsCallback];
+  batchTrx?: any;
+  fromValue?: number;
+  toValue?: number;
 };
 
 export type AllowanceVerifyModalData = {
