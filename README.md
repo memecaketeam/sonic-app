@@ -11,7 +11,7 @@
 - Medium: [sonic-ooo.medium.com](https://sonic-ooo.medium.com/)
 - Docs: [docs.sonic.ooo](https://docs.sonic.ooo/)
 - X (formerly Twitter): [@sonic_ooo](https://x.com/sonic_ooo)
-- Discord: [Sonic](https://discord.gg/ZxX44xyu)
+- Discord: [Sonic](https://discord.com/invite/EkmnRd99h6)
 
 ## Accessing Sonic Application 🖥
 
