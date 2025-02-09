@@ -10,7 +10,7 @@
 - Application: [app.sonic.ooo](https://app.sonic.ooo)
 - Medium: [sonic-ooo.medium.com](https://sonic-ooo.medium.com/)
 - Docs: [docs.sonic.ooo](https://docs.sonic.ooo/)
-- Twitter: [@sonic_ooo](https://twitter.com/sonic_ooo)
+- X (formerly Twitter): [@sonic_ooo](https://x.com/sonic_ooo)
 - Discord: [Sonic](https://discord.gg/ZxX44xyu)
 
 ## Accessing Sonic Application 🖥
